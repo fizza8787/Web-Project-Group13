@@ -12,6 +12,13 @@ const userSchema = new mongoose.Schema(
     },
     skills: [{ type: String, trim: true }],
     bio: { type: String, default: "" },
+    rating: { type: Number, min: 0, max: 5, default: 0 },
+    hourlyRate: { type: Number, min: 0, default: 0 },
+    availability: {
+      type: String,
+      enum: ["available", "busy", "limited"],
+      default: "available"
+    },
     profileImage: { type: String, default: "" },
     isActive: { type: Boolean, default: true }
   },

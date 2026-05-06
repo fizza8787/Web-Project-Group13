@@ -66,7 +66,14 @@ function DashboardPage() {
 }
 
 function ProfilePage() {
-  const [profile, setProfile] = useState({ name: "", bio: "", skills: [], portfolio: [] });
+  const [profile, setProfile] = useState({
+    name: "",
+    bio: "",
+    skills: [],
+    hourlyRate: 0,
+    availability: "available",
+    portfolio: []
+  });
   const [item, setItem] = useState({ title: "", description: "", image: "" });
   const [profileFile, setProfileFile] = useState(null);
   const [portfolioFile, setPortfolioFile] = useState(null);
@@ -78,6 +85,8 @@ function ProfilePage() {
     payload.append("name", profile.name || "");
     payload.append("bio", profile.bio || "");
     payload.append("skills", Array.isArray(profile.skills) ? profile.skills.join(",") : (profile.skills || ""));
+    payload.append("hourlyRate", String(profile.hourlyRate || 0));
+    payload.append("availability", profile.availability || "available");
     if (profileFile) payload.append("profileImage", profileFile);
     await API.put("/users/me", payload);
     setProfileFile(null);
@@ -96,7 +105,7 @@ function ProfilePage() {
     load();
   };
   const delItem = async (id) => { await API.delete(`/users/me/portfolio/${id}`); load(); };
-  return <div className="space-y-4"><h2 className="text-2xl font-semibold">Profile & Portfolio</h2><form className={shellCard} onSubmit={save}><div className="grid gap-2 md:grid-cols-2"><input className="rounded bg-slate-800 p-2" value={profile.name||""} onChange={(e)=>setProfile({...profile,name:e.target.value})} placeholder="Name" /><input className="rounded bg-slate-800 p-2" value={Array.isArray(profile.skills)?profile.skills.join(","):profile.skills||""} onChange={(e)=>setProfile({...profile,skills:e.target.value})} placeholder="Skills" /></div><textarea className="mt-2 w-full rounded bg-slate-800 p-2" rows={3} value={profile.bio||""} onChange={(e)=>setProfile({...profile,bio:e.target.value})} placeholder="Bio" /><input className="mt-2 w-full rounded bg-slate-800 p-2" type="file" accept="image/*" onChange={(e)=>setProfileFile(e.target.files?.[0] || null)} /><button className="mt-2 rounded bg-emerald-400 px-3 py-1.5 text-slate-950">Save</button></form><form className={shellCard} onSubmit={addItem}><h3 className="mb-2 font-semibold">Add Portfolio Item</h3><div className="grid gap-2 md:grid-cols-3"><input className="rounded bg-slate-800 p-2" placeholder="Title" value={item.title} onChange={(e)=>setItem({...item,title:e.target.value})} required /><input className="rounded bg-slate-800 p-2" placeholder="Description" value={item.description} onChange={(e)=>setItem({...item,description:e.target.value})} required /><input className="rounded bg-slate-800 p-2" placeholder="Image URL (optional)" value={item.image} onChange={(e)=>setItem({...item,image:e.target.value})} /></div><input className="mt-2 w-full rounded bg-slate-800 p-2" type="file" accept="image/*" onChange={(e)=>setPortfolioFile(e.target.files?.[0] || null)} /><button className="mt-2 rounded bg-emerald-400 px-3 py-1.5 text-slate-950">Add</button></form><div className="grid gap-3 md:grid-cols-2">{profile.portfolio?.map((p)=><div className={shellCard} key={p._id}>{p.image&&<img src={p.image} alt={p.title} className="mb-2 h-36 w-full rounded object-cover" />}<p className="font-semibold">{p.title}</p><p className="text-sm text-slate-400">{p.description}</p><button className="mt-2 rounded border border-red-500 px-2 py-1 text-xs text-red-400" onClick={()=>delItem(p._id)}>Delete</button></div>)}</div></div>;
+  return <div className="space-y-4"><h2 className="text-2xl font-semibold">Profile & Portfolio</h2><form className={shellCard} onSubmit={save}><div className="grid gap-2 md:grid-cols-2"><input className="rounded bg-slate-800 p-2" value={profile.name||""} onChange={(e)=>setProfile({...profile,name:e.target.value})} placeholder="Name" /><input className="rounded bg-slate-800 p-2" value={Array.isArray(profile.skills)?profile.skills.join(","):profile.skills||""} onChange={(e)=>setProfile({...profile,skills:e.target.value})} placeholder="Skills" /></div><div className="mt-2 grid gap-2 md:grid-cols-2"><input className="rounded bg-slate-800 p-2" type="number" min="0" placeholder="Hourly Rate (PKR)" value={profile.hourlyRate||0} onChange={(e)=>setProfile({...profile,hourlyRate:e.target.value})} /><select className="rounded bg-slate-800 p-2" value={profile.availability||"available"} onChange={(e)=>setProfile({...profile,availability:e.target.value})}><option value="available">Available</option><option value="limited">Limited</option><option value="busy">Busy</option></select></div><textarea className="mt-2 w-full rounded bg-slate-800 p-2" rows={3} value={profile.bio||""} onChange={(e)=>setProfile({...profile,bio:e.target.value})} placeholder="Bio" /><input className="mt-2 w-full rounded bg-slate-800 p-2" type="file" accept="image/*" onChange={(e)=>setProfileFile(e.target.files?.[0] || null)} /><button className="mt-2 rounded bg-emerald-400 px-3 py-1.5 text-slate-950">Save</button></form><form className={shellCard} onSubmit={addItem}><h3 className="mb-2 font-semibold">Add Portfolio Item</h3><div className="grid gap-2 md:grid-cols-3"><input className="rounded bg-slate-800 p-2" placeholder="Title" value={item.title} onChange={(e)=>setItem({...item,title:e.target.value})} required /><input className="rounded bg-slate-800 p-2" placeholder="Description" value={item.description} onChange={(e)=>setItem({...item,description:e.target.value})} required /><input className="rounded bg-slate-800 p-2" placeholder="Image URL (optional)" value={item.image} onChange={(e)=>setItem({...item,image:e.target.value})} /></div><input className="mt-2 w-full rounded bg-slate-800 p-2" type="file" accept="image/*" onChange={(e)=>setPortfolioFile(e.target.files?.[0] || null)} /><button className="mt-2 rounded bg-emerald-400 px-3 py-1.5 text-slate-950">Add</button></form><div className="grid gap-3 md:grid-cols-2">{profile.portfolio?.map((p)=><div className={shellCard} key={p._id}>{p.image&&<img src={p.image} alt={p.title} className="mb-2 h-36 w-full rounded object-cover" />}<p className="font-semibold">{p.title}</p><p className="text-sm text-slate-400">{p.description}</p><button className="mt-2 rounded border border-red-500 px-2 py-1 text-xs text-red-400" onClick={()=>delItem(p._id)}>Delete</button></div>)}</div></div>;
 }
 
 function JobsPage() {

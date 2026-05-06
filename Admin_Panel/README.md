@@ -10,6 +10,9 @@ Complete admin-focused MERN module for moderation, analytics, and control.
 - Platform analytics (users, jobs, proposals, pending reports + chart)
 - Report management (view reports, resolve reports)
 - Secure admin route protection on backend and frontend
+- CurrencyFreaks integration (`/api/currency`) for live PKR/USD rate
+- Job budget sync utility to populate `budgetUSD` using live rates
+- Gemini-backed chatbot recommendations (falls back to local skill matching)
 
 ## Folder Structure
 
@@ -45,6 +48,14 @@ Frontend reads API URL from `VITE_API_BASE_URL`.
 - `DELETE /api/admin/users/:id`
 - `GET /api/admin/jobs`
 - `PUT /api/admin/jobs/:id/status`
+- `PUT /api/admin/jobs/sync-budgets`
 - `DELETE /api/admin/jobs/:id`
 - `GET /api/admin/reports`
 - `PUT /api/admin/reports/:id/resolve`
+- `GET /api/currency/rate`
+- `GET /api/currency/convert?amountPKR=150000`
+- `POST /api/chatbot/recommendations`
+
+## Data Dictionary
+
+- Proposal-aligned data dictionary is available in `DATA_DICTIONARY.md`.

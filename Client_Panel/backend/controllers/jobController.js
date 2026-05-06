@@ -5,7 +5,7 @@ const axios = require('axios');
 const getUSDRate = async () => {
   try {
     const { data } = await axios.get(
-      `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.CURRENCY_API_KEY}&symbols=PKR,USD`
+      `https://api.currencyfreaks.com/v2.0/rates/latest?apikey=${process.env.CURRENCY_FREAKS_API_KEY}&symbols=PKR,USD`
     );
     const pkrRate = parseFloat(data.rates.PKR);
     return pkrRate;

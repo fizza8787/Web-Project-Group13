@@ -3,6 +3,7 @@ const Proposal = require("../models/Proposal");
 const Report = require("../models/Report");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const { convertPkrToUsd } = require("../services/currencyService");
 
 exports.getStats = async (req, res, next) => {
   try {
@@ -137,6 +138,46 @@ exports.getAllJobs = async (req, res, next) => {
   }
 };
 
+exports.globalSearch = async (req, res, next) => {
+  try {
+    const { keyword = "", role, status, limit = 10 } = req.query;
+    const parsedLimit = Math.max(1, Math.min(50, Number(limit) || 10));
+
+    const userFilter = {};
+    const jobFilter = {};
+
+    if (keyword) {
+      userFilter.$or = [
+        { name: { $regex: keyword, $options: "i" } },
+        { email: { $regex: keyword, $options: "i" } }
+      ];
+      jobFilter.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+        { category: { $regex: keyword, $options: "i" } },
+        { skillsRequired: { $elemMatch: { $regex: keyword, $options: "i" } } }
+      ];
+    }
+
+    if (role) userFilter.role = role;
+    if (status) jobFilter.status = status;
+
+    const [users, jobs] = await Promise.all([
+      User.find(userFilter).select("-password").sort({ createdAt: -1 }).limit(parsedLimit),
+      Job.find(jobFilter).populate("clientId", "name email").sort({ createdAt: -1 }).limit(parsedLimit)
+    ]);
+
+    res.json({
+      success: true,
+      users,
+      jobs,
+      counts: { users: users.length, jobs: jobs.length }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.updateJobStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -159,6 +200,31 @@ exports.deleteJob = async (req, res, next) => {
     if (!job) return res.status(404).json({ success: false, message: "Job not found" });
     await job.deleteOne();
     res.json({ success: true, message: "Job removed" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.syncJobBudgets = async (req, res, next) => {
+  try {
+    const jobs = await Job.find({ budget: { $gte: 0 } }).select("_id budget budgetUSD");
+    let updatedCount = 0;
+
+    for (const job of jobs) {
+      const { amountUSD } = await convertPkrToUsd(job.budget);
+      if (job.budgetUSD !== amountUSD) {
+        job.budgetUSD = amountUSD;
+        await job.save();
+        updatedCount += 1;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Job budgets synced with CurrencyFreaks",
+      totalJobs: jobs.length,
+      updatedCount
+    });
   } catch (error) {
     next(error);
   }

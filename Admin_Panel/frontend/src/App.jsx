@@ -7,6 +7,8 @@ import UserManagement from "./pages/UserManagement";
 import JobModeration from "./pages/JobModeration";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
+import ChatbotRecommendations from "./pages/ChatbotRecommendations";
+import GlobalSearch from "./pages/GlobalSearch";
 
 const App = () => {
   return (
@@ -26,7 +28,9 @@ const App = () => {
         <Route path="users" element={<UserManagement />} />
         <Route path="jobs" element={<JobModeration />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="search" element={<GlobalSearch />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="chatbot" element={<ChatbotRecommendations />} />
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
     </Routes>

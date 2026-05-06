@@ -9,8 +9,10 @@ const {
   toggleUserStatus,
   deleteUser,
   getAllJobs,
+  globalSearch,
   updateJobStatus,
   deleteJob,
+  syncJobBudgets,
   getReports,
   resolveReport
 } = require("../controllers/adminController");
@@ -28,8 +30,10 @@ router.put("/users/:id/toggle", toggleUserStatus);
 router.delete("/users/:id", deleteUser);
 
 router.get("/jobs", getAllJobs);
+router.get("/search", globalSearch);
 router.put("/jobs/:id/status", updateJobStatus);
 router.delete("/jobs/:id", deleteJob);
+router.put("/jobs/sync-budgets", syncJobBudgets);
 
 router.get("/reports", getReports);
 router.put("/reports/:id/resolve", resolveReport);

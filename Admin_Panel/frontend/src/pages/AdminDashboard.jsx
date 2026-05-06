@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchStats } from "../store/slices/adminSlice";
+import { fetchCurrencyRate, fetchStats } from "../store/slices/adminSlice";
 
 const statCards = [
   { key: "users", label: "Total Users" },
@@ -11,10 +11,11 @@ const statCards = [
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { stats } = useSelector((state) => state.admin);
+  const { stats, currency } = useSelector((state) => state.admin);
 
   useEffect(() => {
     dispatch(fetchStats());
+    dispatch(fetchCurrencyRate());
   }, [dispatch]);
 
   return (
@@ -26,6 +27,13 @@ const AdminDashboard = () => {
             <p className="mt-2 text-3xl font-bold text-white">{stats[card.key] ?? 0}</p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-5">
+        <p className="text-sm text-slate-400">Live PKR/USD Conversion (CurrencyFreaks)</p>
+        <p className="mt-2 text-2xl font-bold text-white">
+          1 USD = {Number.isFinite(Number(currency.pkrPerUsd)) ? Number(currency.pkrPerUsd).toFixed(2) : "N/A"} PKR
+        </p>
       </div>
     </section>
   );

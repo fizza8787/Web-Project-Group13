@@ -64,6 +64,15 @@ export const fetchJobs = createAsyncThunk("admin/fetchJobs", async (params = {},
   }
 });
 
+export const globalSearch = createAsyncThunk("admin/globalSearch", async (params = {}, { rejectWithValue }) => {
+  try {
+    const { data } = await apiClient.get("/admin/search", { params });
+    return data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Failed to search platform data");
+  }
+});
+
 export const updateJobStatus = createAsyncThunk(
   "admin/updateJobStatus",
   async ({ id, status }, { rejectWithValue }) => {
@@ -103,13 +112,56 @@ export const resolveReport = createAsyncThunk("admin/resolveReport", async (id, 
   }
 });
 
+export const fetchCurrencyRate = createAsyncThunk("admin/fetchCurrencyRate", async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await apiClient.get("/currency/rate");
+    return data.pkrPerUsd;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Failed to fetch currency rate");
+  }
+});
+
+export const syncJobBudgets = createAsyncThunk("admin/syncJobBudgets", async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await apiClient.put("/admin/jobs/sync-budgets");
+    return data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Failed to sync job budgets");
+  }
+});
+
+export const getChatbotRecommendations = createAsyncThunk(
+  "admin/getChatbotRecommendations",
+  async (skills, { rejectWithValue }) => {
+    try {
+      const { data } = await apiClient.post("/chatbot/recommendations", { skills });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to get job recommendations");
+    }
+  }
+);
+
 const adminSlice = createSlice({
   name: "admin",
   initialState: {
     stats: { users: 0, jobs: 0, proposals: 0, pendingReports: 0 },
     users: [],
     jobs: [],
+    searchResults: {
+      users: [],
+      jobs: [],
+      counts: { users: 0, jobs: 0 }
+    },
     reports: [],
+    currency: {
+      pkrPerUsd: null
+    },
+    chatbot: {
+      skills: [],
+      recommendations: [],
+      botMessage: ""
+    },
     isLoading: false,
     error: null
   },
@@ -137,6 +189,13 @@ const adminSlice = createSlice({
       .addCase(fetchJobs.fulfilled, (state, action) => {
         state.jobs = action.payload;
       })
+      .addCase(globalSearch.fulfilled, (state, action) => {
+        state.searchResults = {
+          users: action.payload.users || [],
+          jobs: action.payload.jobs || [],
+          counts: action.payload.counts || { users: 0, jobs: 0 }
+        };
+      })
       .addCase(updateJobStatus.fulfilled, (state, action) => {
         state.jobs = state.jobs.map((job) => (job._id === action.payload._id ? action.payload : job));
       })
@@ -148,6 +207,16 @@ const adminSlice = createSlice({
       })
       .addCase(resolveReport.fulfilled, (state, action) => {
         state.reports = state.reports.map((report) => (report._id === action.payload._id ? action.payload : report));
+      })
+      .addCase(fetchCurrencyRate.fulfilled, (state, action) => {
+        state.currency.pkrPerUsd = action.payload;
+      })
+      .addCase(getChatbotRecommendations.fulfilled, (state, action) => {
+        state.chatbot = {
+          skills: action.payload.skills,
+          recommendations: action.payload.recommendations,
+          botMessage: action.payload.botMessage
+        };
       })
       .addMatcher(
         (action) => action.type.startsWith("admin/") && action.type.endsWith("/pending"),

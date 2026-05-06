@@ -27,6 +27,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/admin", require("./src/routes/adminRoutes"));
 app.use("/api/reports", require("./src/routes/reportRoutes"));
+app.use("/api/currency", require("./src/routes/currencyRoutes"));
+app.use("/api/chatbot", require("./src/routes/chatbotRoutes"));
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

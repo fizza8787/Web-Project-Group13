@@ -6,6 +6,11 @@ export default function BrowseFreelancers() {
   const [freelancers, setFreelancers] = useState([]);
   const [search, setSearch] = useState('');
   const [skill, setSkill] = useState('');
+  const [minRating, setMinRating] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [availability, setAvailability] = useState('');
+  const [sortBy, setSortBy] = useState('latest');
   const [loading, setLoading] = useState(false);
   const [reportingId, setReportingId] = useState('');
 
@@ -13,12 +18,22 @@ export default function BrowseFreelancers() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const r = await api.get('/users', { params: { search, skill } });
+        const r = await api.get('/users', {
+          params: {
+            search,
+            skill,
+            minRating,
+            minHourlyRate: minPrice,
+            maxHourlyRate: maxPrice,
+            availability,
+            sortBy,
+          },
+        });
         setFreelancers(r.data.freelancers);
       } finally { setLoading(false); }
     }, 400);
     return () => clearTimeout(timer);
-  }, [search, skill]);
+  }, [search, skill, minRating, minPrice, maxPrice, availability, sortBy]);
 
   const reportFreelancer = async (freelancerId) => {
     const reason = window.prompt('Enter report reason');
@@ -53,11 +68,33 @@ export default function BrowseFreelancers() {
         </div>
 
         {/* Search Bar */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '28px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '28px' }}>
           <input className="search-input" style={{ flex: 1 }} placeholder="🔍  Search by name or skill..."
             value={search} onChange={e => setSearch(e.target.value)} />
-          <input className="search-input" style={{ width: '200px' }} placeholder="Filter by skill..."
+          <input className="search-input" placeholder="Filter by skill..."
             value={skill} onChange={e => setSkill(e.target.value)} />
+          <select className="search-input" value={minRating} onChange={e => setMinRating(e.target.value)}>
+            <option value="">Min Rating</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+          <input className="search-input" type="number" placeholder="Min Price" value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+          <input className="search-input" type="number" placeholder="Max Price" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+          <select className="search-input" value={availability} onChange={e => setAvailability(e.target.value)}>
+            <option value="">Availability</option>
+            <option value="available">Available</option>
+            <option value="limited">Limited</option>
+            <option value="busy">Busy</option>
+          </select>
+          <select className="search-input" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <option value="latest">Latest</option>
+            <option value="rating">Top Rated</option>
+            <option value="priceLowToHigh">Price Low-High</option>
+            <option value="priceHighToLow">Price High-Low</option>
+          </select>
         </div>
 
         {loading && <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>Searching...</p>}
@@ -80,6 +117,13 @@ export default function BrowseFreelancers() {
               <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', margin: '0 0 14px', lineHeight: '1.5' }}>
                 {f.bio || 'No bio provided.'}
               </p>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{ color: '#fbbf24', fontSize: '12px' }}>⭐ {Number(f.rating || 0).toFixed(1)}</span>
+                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '12px' }}>PKR {Number(f.hourlyRate || 0).toLocaleString()}/hr</span>
+                <span style={{ color: f.availability === 'available' ? '#34d399' : f.availability === 'limited' ? '#fbbf24' : '#f87171', fontSize: '12px', textTransform: 'capitalize' }}>
+                  {f.availability || 'available'}
+                </span>
+              </div>
               {f.skills?.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {f.skills.slice(0, 5).map(s => (

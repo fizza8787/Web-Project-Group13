@@ -1,4 +1,4 @@
-import { BarChart3, Briefcase, Flag, Home, LogOut, ShieldCheck, Users } from "lucide-react";
+import { BarChart3, Briefcase, Flag, Home, LogOut, MessageCircle, Search, ShieldCheck, Users } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../store/slices/authSlice";
@@ -7,8 +7,10 @@ const navItems = [
   { to: "/admin/dashboard", label: "Dashboard", icon: Home },
   { to: "/admin/users", label: "User Management", icon: Users },
   { to: "/admin/jobs", label: "Job Moderation", icon: Briefcase },
+  { to: "/admin/search", label: "Search & Filter", icon: Search },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/admin/reports", label: "Reports", icon: Flag }
+  { to: "/admin/reports", label: "Reports", icon: Flag },
+  { to: "/admin/chatbot", label: "Chatbot", icon: MessageCircle }
 ];
 
 const AdminLayout = () => {

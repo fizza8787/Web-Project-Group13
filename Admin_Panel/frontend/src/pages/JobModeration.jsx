@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteJob, fetchJobs, updateJobStatus } from "../store/slices/adminSlice";
+import { deleteJob, fetchJobs, syncJobBudgets, updateJobStatus } from "../store/slices/adminSlice";
 
 const JobModeration = () => {
   const dispatch = useDispatch();
@@ -35,6 +35,15 @@ const JobModeration = () => {
           <option value="rejected">Rejected</option>
           <option value="open">Open</option>
         </select>
+        <button
+          onClick={async () => {
+            await dispatch(syncJobBudgets());
+            dispatch(fetchJobs({ keyword, status }));
+          }}
+          className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Sync PKR/USD
+        </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -46,6 +55,10 @@ const JobModeration = () => {
             </div>
             <p className="mt-2 line-clamp-3 text-sm text-slate-300">{job.description}</p>
             <p className="mt-2 text-xs text-slate-400">Category: {job.category}</p>
+            <p className="text-xs text-slate-400">
+              Budget: PKR {Number(job.budget || 0).toLocaleString()} | USD{" "}
+              {Number(job.budgetUSD || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
             <p className="text-xs text-slate-400">Client: {job.clientId?.name || "Unknown"}</p>
 
             <div className="mt-4 flex flex-wrap gap-2">
